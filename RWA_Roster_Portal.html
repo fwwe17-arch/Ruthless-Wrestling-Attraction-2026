@@ -1,0 +1,131 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>RWA — Current Rosters</title>
+<style>
+:root{--bg:#08090c;--card:#111319;--text:#f4f4f5;--muted:#9297a3;--line:#242731;--rage:#e3262e;--lightning:#2998e8;--rxt:#8d929b}
+*{box-sizing:border-box} body{margin:0;background:radial-gradient(circle at top,#191b22 0,#08090c 42%);color:var(--text);font-family:Arial,Helvetica,sans-serif}
+header{padding:34px 18px 24px;text-align:center;border-bottom:1px solid var(--line)}
+.logo{font-size:14px;letter-spacing:5px;color:#aaa;font-weight:700}.title{font-size:34px;font-weight:900;margin:8px 0}.sub{color:var(--muted)}
+.container{max-width:1050px;margin:auto;padding:25px 16px 60px}
+.actions{display:flex;gap:10px;justify-content:center;flex-wrap:wrap;margin-bottom:24px}
+button{border:0;border-radius:10px;padding:13px 18px;font-weight:800;cursor:pointer;color:white;background:#20232b}
+button.primary{background:#e3262e} button:hover{filter:brightness(1.12)}
+.grid{display:grid;grid-template-columns:repeat(3,1fr);gap:16px}
+.brand{background:rgba(17,19,25,.94);border:1px solid var(--line);border-radius:18px;overflow:hidden;min-height:260px}
+.brand-head{padding:18px;color:white}.brand-head h2{margin:0;font-size:23px}.brand-head p{margin:5px 0 0;opacity:.8;font-size:12px}
+.rage .brand-head{background:linear-gradient(135deg,#a70f17,#e3262e)}.lightning .brand-head{background:linear-gradient(135deg,#1266a6,#2998e8)}.rxt .brand-head{background:linear-gradient(135deg,#555a63,#8d929b)}
+.roster{padding:14px}.wrestler{display:flex;align-items:center;justify-content:space-between;padding:12px 10px;border-bottom:1px solid var(--line);gap:8px}.wrestler:last-child{border-bottom:0}.name{font-weight:800}.empty{padding:25px 10px;color:var(--muted);text-align:center}
+.modal{position:fixed;inset:0;background:rgba(0,0,0,.72);display:none;align-items:center;justify-content:center;padding:16px;z-index:10}.modal.open{display:flex}.box{background:#12141a;border:1px solid #2b2f39;border-radius:18px;padding:22px;max-width:480px;width:100%}.box h2{margin-top:0}
+input,select{width:100%;padding:13px;border-radius:10px;border:1px solid #30343f;background:#090a0e;color:white;margin:7px 0 14px}label{font-size:13px;color:#b9bdc7}
+.row{display:flex;gap:10px}.row>*{flex:1}.notice{font-size:12px;color:var(--muted);margin-top:10px}.close{float:right;background:transparent;padding:4px 8px;font-size:18px}
+.admin-list{max-height:280px;overflow:auto;margin-top:12px}.admin-item{display:flex;justify-content:space-between;align-items:center;padding:9px 0;border-bottom:1px solid var(--line)}.danger{background:#7e1d24}
+footer{text-align:center;color:#666d79;font-size:12px;padding:20px}
+@media(max-width:760px){.grid{grid-template-columns:1fr}.title{font-size:28px}.container{padding-top:18px}}
+</style>
+</head>
+<body>
+<header>
+  <div class="logo">RUTHLESS WRESTLING ATTRACTION</div>
+  <div class="title">CURRENT ROSTERS</div>
+  <div class="sub">Official RWA roster portal</div>
+</header>
+
+<div class="container">
+  <div class="actions">
+    <button class="primary" onclick="openJoin()">JOIN RWA</button>
+    <button onclick="openAdmin()">STAFF / ADMIN</button>
+  </div>
+  <div class="grid">
+    <section class="brand rage"><div class="brand-head"><h2>🔴 RAGE</h2><p>Saturday • 4:00 PM EST</p></div><div id="rage" class="roster"></div></section>
+    <section class="brand lightning"><div class="brand-head"><h2>🔵 LIGHTNING</h2><p>Sunday • 4:00 PM EST</p></div><div id="lightning" class="roster"></div></section>
+    <section class="brand rxt"><div class="brand-head"><h2>⚪ RXT</h2><p>Wednesday • 5:00 PM EST</p></div><div id="rxt" class="roster"></div></section>
+  </div>
+</div>
+
+<footer>RWA • Rosters can be managed by authorized staff.</footer>
+
+<div id="joinModal" class="modal"><div class="box">
+<button class="close" onclick="closeModals()">×</button>
+<h2>Join RWA</h2>
+<p class="sub">Choose your brand and enter your wrestling gimmick name.</p>
+<label>Brand</label>
+<select id="joinBrand"><option value="rage">🔴 RAGE</option><option value="lightning">🔵 LIGHTNING</option><option value="rxt">⚪ RXT</option></select>
+<label>Gimmick Name</label>
+<input id="joinName" placeholder="e.g. JAMES ARTHUR" maxlength="40">
+<label>Discord Username (optional)</label>
+<input id="joinDiscord" placeholder="@username" maxlength="40">
+<button class="primary" style="width:100%" onclick="submitJoin()">SUBMIT ROSTER REQUEST</button>
+<div class="notice">This demo stores data in this browser. A live public site needs a database/hosting connection for everyone to see the same roster.</div>
+</div></div>
+
+
+<div id="loginModal" class="modal"><div class="box">
+<button class="close" onclick="closeModals()">×</button>
+<h2>🔐 RWA Staff Login</h2>
+<p class="sub">Staff access only. Public visitors cannot edit the roster.</p>
+<label>Staff Password</label>
+<input id="staffPassword" type="password" placeholder="Enter staff password" onkeydown="if(event.key==='Enter')loginStaff()">
+<button class="primary" style="width:100%" onclick="loginStaff()">LOGIN</button>
+<div class="notice">Prototype password is <b>CHANGE-ME</b>. Change it in the page code before using this publicly. A truly secure public admin panel needs server-side authentication.</div>
+</div></div>
+
+<div id="adminModal" class="modal"><div class="box">
+<button class="close" onclick="closeModals()">×</button>
+<h2>RWA Staff Panel</h2>
+<p class="sub">Demo admin controls.</p>
+<div class="row"><div><label>Brand</label><select id="adminBrand"><option value="rage">RAGE</option><option value="lightning">LIGHTNING</option><option value="rxt">RXT</option></select></div><div><label>Gimmick Name</label><input id="adminName" placeholder="Gimmick name"></div></div>
+<button class="primary" onclick="adminAdd()">ADD WRESTLER</button>
+<div id="adminList" class="admin-list"></div>
+<div class="notice">For a real public version, staff login and a shared database should replace browser-only storage.</div>
+</div></div>
+
+<script>
+const KEY="rwa_rosters_v1";
+let data=JSON.parse(localStorage.getItem(KEY)||'{"rage":[],"lightning":[],"rxt":[]}');
+
+function save(){localStorage.setItem(KEY,JSON.stringify(data));render();}
+function render(){
+  for(const brand of ["rage","lightning","rxt"]){
+    const el=document.getElementById(brand);
+    el.innerHTML=data[brand].length?data[brand].map((x,i)=>`<div class="wrestler"><span class="name">${esc(x.name)}</span><span>${x.discord?esc(x.discord):""}</span></div>`).join(""):'<div class="empty">No wrestlers registered yet.</div>';
+  }
+  renderAdmin();
+}
+function esc(s){return String(s).replace(/[&<>"']/g,m=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[m]));}
+function openJoin(){document.getElementById("joinModal").classList.add("open")}
+function openAdmin(){
+  document.getElementById("loginModal").classList.add("open");
+  document.getElementById("staffPassword").focus();
+}
+function loginStaff(){
+  const pw=document.getElementById("staffPassword").value;
+  if(pw === "CHANGE-ME"){
+    document.getElementById("loginModal").classList.remove("open");
+    document.getElementById("adminModal").classList.add("open");
+    document.getElementById("staffPassword").value="";
+  } else {
+    alert("Incorrect staff password.");
+  }
+}
+function closeModals(){document.querySelectorAll(".modal").forEach(x=>x.classList.remove("open"))}
+function submitJoin(){
+  const b=document.getElementById("joinBrand").value,n=document.getElementById("joinName").value.trim(),d=document.getElementById("joinDiscord").value.trim();
+  if(!n)return alert("Please enter your gimmick name.");
+  data[b].push({name:n,discord:d});save();closeModals();alert("Roster request added!");
+}
+function adminAdd(){
+  const b=document.getElementById("adminBrand").value,n=document.getElementById("adminName").value.trim();
+  if(!n)return alert("Enter a gimmick name.");data[b].push({name:n,discord:""});save();document.getElementById("adminName").value="";
+}
+function removeWrestler(b,i){if(confirm("Remove this wrestler?")){data[b].splice(i,1);save();}}
+function renderAdmin(){
+ const el=document.getElementById("adminList"); if(!el)return;
+ el.innerHTML=["rage","lightning","rxt"].flatMap(b=>data[b].map((x,i)=>`<div class="admin-item"><span>${b.toUpperCase()} — <b>${esc(x.name)}</b></span><button class="danger" onclick="removeWrestler('${b}',${i})">REMOVE</button></div>`)).join("")||'<div class="empty">Roster is empty.</div>';
+}
+render();
+</script>
+</body>
+</html>
